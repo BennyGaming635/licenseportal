@@ -1,0 +1,62 @@
+<html>
+    <head>
+        <title>Welcome to the Carpark</title>
+        <style>
+            body {
+                background: #111;
+                color: white;
+                font-family: Arial;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                flex-direction: column;
+                overflow: hidden;
+            }
+
+            .arrow {
+                font-size: 120px;
+                animation: bounce 1s infinite;
+            }
+
+            @keyframes bounce {
+                0%,100% { transform: translateY(0); }
+                50% {transform: translateY(20px); }
+            }
+
+            button {
+                padding: 25px 60px;
+                font-size: 40px;
+                border: none;
+                border-radius: 20px;
+                cursor: pointer;
+            }
+
+            #ticket {
+                margin-top: 40px;
+                font-size: 120px;
+                display: none;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="arrow">↓</div>
+        <button onclick="getTicket()">PRESS FOR TICKET</button>
+        <div id="ticket"></div>
+        <script>
+            async function getTicket() {
+                const response = await fetch('/generate_ticket');
+                const data = await response.json();
+
+                const ticket = document.getElementById('ticket');
+
+                ticket.innerText = data.code;
+                ticket.style.display = "block";
+
+                setTimeout(() => {
+                    ticket.style.display = "none";
+                }, 5000);
+            }
+        </script>
+    </body>
+</html>
