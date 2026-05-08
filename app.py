@@ -15,7 +15,7 @@ def init_db():
     c.execute("""
         CREATE TABLE IF NOT EXISTS tickets (
             code TEXT PRIMARY KEY,
-            paid INTEGER DEFAULT 0
+            paid INTEGER DEFAULT 0,
             entry_time INTEGER
         )
     """)
