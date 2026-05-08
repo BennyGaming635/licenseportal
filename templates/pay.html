@@ -1,0 +1,217 @@
+<html>
+<head>
+    <title>Pay for Parking</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: #111;
+            color: white;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+        }
+
+        .card {
+            background: #222;
+            padding: 40px;
+            border-radius: 20px;
+            width: 420px;
+            text-align: center;
+        }
+
+        h1 {
+            margin-top: 0;
+        }
+
+        input {
+            width: 100%;
+            padding: 15px;
+            font-size: 22px;
+            border-radius: 10px;
+            border: none;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 16px;
+            font-size: 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-bottom: 15px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .status {
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        .unpaid {
+            color: #ffcc00;
+        }
+
+        .paid {
+            color: #00ff99;
+        }
+
+        #demo-box {
+            margin-top: 20px;
+        }
+
+        .small-text {
+            font-size: 14px;
+            opacity: 0.7;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="card">
+
+    <div id="screen1">
+
+        <h1>Parking Payment</h1>
+
+        <input
+            type="text"
+            id="ticket-code"
+            placeholder="Enter Ticket Code"
+        >
+
+        <button onclick="checkTicket()">
+            Continue
+        </button>
+
+        <div class="small-text">
+            Example codes: A41, A42...
+        </div>
+
+    </div>
+
+    <div id="screen2" class="hidden">
+
+        <h1>Ticket Found</h1>
+
+        <div class="status unpaid">
+            Payment Required
+        </div>
+
+        <p>
+            Amount Due: <b>$10.00 AUD</b>
+        </p>
+
+        <div id="payment-options">
+
+            <button onclick="showDemoPayment()">
+                Demo Payment
+            </button>
+
+            <button onclick="dummyCard()">
+                Credit / Debit Card
+            </button>
+
+        </div>
+
+        <div id="demo-box" class="hidden">
+
+            <input
+                type="password"
+                id="auth-code"
+                placeholder="Enter Auth Code"
+            >
+
+            <button onclick="completeDemoPayment()">
+                Confirm Payment
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+let currentTicket = null;
+
+async function checkTicket() {
+
+    const code = document.getElementById("ticket-code").value;
+
+    const response = await fetch("/check_ticket", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ code })
+    });
+
+    const data = await response.json();
+
+    if (!data.success) {
+        alert("Invalid ticket code");
+        return;
+    }
+
+    if (data.paid) {
+        alert("Ticket already paid");
+        return;
+    }
+
+    currentTicket = code;
+
+    document.getElementById("screen1").classList.add("hidden");
+    document.getElementById("screen2").classList.remove("hidden");
+}
+
+function showDemoPayment() {
+    document.getElementById("demo-box").classList.remove("hidden");
+}
+
+async function completeDemoPayment() {
+
+    const auth = document.getElementById("auth-code").value;
+
+    if (auth !== "1234") {
+        alert("Incorrect auth code");
+        return;
+    }
+
+    await markPaid();
+
+    alert("Payment successful");
+    location.reload();
+}
+
+function dummyCard() {
+    alert("Credit / Debit Card payment (demo only)");
+}
+
+async function markPaid() {
+
+    await fetch("/mark_paid", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            code: currentTicket
+        })
+    });
+}
+
+</script>
+
+</body>
+</html>
