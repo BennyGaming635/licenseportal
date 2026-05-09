@@ -137,52 +137,115 @@ def check_ticket():
 
 @app.route("/mark_paid", methods=["POST"])
 def mark_paid():
-    code = request.json.get("code")
+
+    data = request.get_json(silent=True) or {}
+
+    code = data.get("code")
+
+    if not code:
+
+        return jsonify({
+            "success": False,
+            "error": "No code provided"
+        }), 400
 
     conn = sqlite3.connect("tickets.db")
     c = conn.cursor()
 
-    c.execute("SELECT paid FROM tickets WHERE code = ?", (code,))
+    c.execute(
+        """
+        SELECT paid
+        FROM tickets
+        WHERE code = ?
+        """,
+        (code,)
+    )
+
     ticket = c.fetchone()
 
-    if not ticket:
-        conn.close()
-        return jsonify({"success": False, "error": "Invalid ticket"})
+    if ticket is None:
 
-    if ticket[0] == 1:
         conn.close()
-        return jsonify({"success": False, "error": "Already paid"})
 
-    c.execute("UPDATE tickets SET paid = 1 WHERE code = ?", (code,))
+        return jsonify({
+            "success": False,
+            "error": "Ticket not found"
+        }), 404
+
+    paid = ticket[0]
+
+    if paid:
+
+        conn.close()
+
+        return jsonify({
+            "success": False,
+            "error": "Ticket already paid"
+        }), 400
+
+    c.execute(
+        """
+        UPDATE tickets
+        SET paid = 1
+        WHERE code = ?
+        """,
+        (code,)
+    )
 
     conn.commit()
     conn.close()
 
-    return jsonify({"success": True})
+    return jsonify({
+        "success": True
+    })
 
 @app.route("/price", methods=["POST"])
 def price():
-    code = request.json.get("code")
+    data = request.get_json(silent=True) or {}
+    code = data.get("code")
 
+    if not code:
+        return jsonify({
+            "success": False,
+            "error": "No code provided"
+        }), 400
+    
     conn = sqlite3.connect("tickets.db")
     c = conn.cursor()
 
-    c.execute("SELECT entry_time FROM tickets WHERE code = ?", (code,))
+    c.execute(
+        """
+        SELECT entry_time, paid
+        FROM tickets
+        WHERE code = ?
+        """,
+        (code,)
+    )
     ticket = c.fetchone()
     conn.close()
 
-    if not ticket:
-        return jsonify({"success": False})
+    if ticket is None:
+        return jsonify({
+            "success": False,
+            "error": "Ticket not found"
+        }), 404
     
     entry_time, paid = ticket
     if paid:
-        return jsonify({"success": True, "amount": 0})
+        return jsonify({
+            "success": True,
+            "amount_due": 0,
+            "minutes": 0
+        })
     
     now = int(time.time())
-    minutes = max(1, (now - entry_time) // 60)
+    minutes = max(1,(now - entry_time) // 60)
+
     amount = round(minutes * COST_PER_MINUTE, 2)
-
-    return jsonify({"success": True, "amount": amount, "minutes": minutes})
-
+    return jsonify({
+        "success": True,
+        "amount": amount,
+        "minutes": minutes
+    })
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)

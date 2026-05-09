@@ -108,7 +108,12 @@
         </div>
 
         <p>
-            Amount Due: <b>$10.00 AUD</b>
+            Amount Due:
+            <b id ="amount-due">$0.00 AUD</b>
+        </p>
+        <p>
+            Parking Time:
+            <b id="minutes">0 minute(s)</b>
         </p>
 
         <div id="payment-options">
@@ -147,36 +152,88 @@ let currentTicket = null;
 
 async function checkTicket() {
 
-    const code = document.getElementById("ticket-code").value;
+    const code = document
+        .getElementById("ticket-code")
+        .value
+        .trim();
 
-    const response = await fetch("/check_ticket", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ code })
-    });
+    if (!code) {
 
-    const data = await response.json();
-
-    if (!data.success) {
-        alert("Invalid ticket code");
+        alert("Enter a ticket code");
         return;
     }
 
-    if (data.paid) {
-        alert("Ticket already paid");
-        return;
+    try {
+
+        const response = await fetch("/check_ticket", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                code: code
+            })
+        });
+
+        const data = await response.json();
+
+        if (!data.success) {
+
+            alert(data.error || "Invalid ticket");
+            return;
+        }
+
+        if (data.paid) {
+
+            alert("Ticket already paid");
+            return;
+        }
+
+        currentTicket = code;
+
+        const priceResponse = await fetch("/price", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                code: code
+            })
+        });
+
+        const priceData = await priceResponse.json();
+
+        if (!priceData.success) {
+
+            alert(priceData.error || "Failed to load price");
+            return;
+        }
+
+        document.getElementById("amount-due").innerText =
+            "$" + priceData.amount.toFixed(2) + " AUD";
+
+        document.getElementById("minutes").innerText =
+            priceData.minutes + " minute(s)";
+
+        document
+            .getElementById("screen1")
+            .classList.add("hidden");
+
+        document
+            .getElementById("screen2")
+            .classList.remove("hidden");
+
+    } catch (err) {
+
+        console.error(err);
+
+        alert("Something went wrong");
     }
-
-    currentTicket = code;
-
-    document.getElementById("screen1").classList.add("hidden");
-    document.getElementById("screen2").classList.remove("hidden");
 }
 
 function showDemoPayment() {
-    document.getElementById("demo-box").classList.remove("hidden");
+    const box = document.getElementById("demo-box");
+    box.classList.remove("hidden");
 }
 
 async function completeDemoPayment() {
@@ -184,18 +241,32 @@ async function completeDemoPayment() {
     const auth = document.getElementById("auth-code").value;
 
     if (auth !== "1234") {
+
         alert("Incorrect auth code");
         return;
     }
 
-    await markPaid();
+    const response = await fetch("/mark_paid", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            code: currentTicket
+        })
+    });
+
+    const data = await response.json();
+
+    if (!data.success) {
+
+        alert(data.error || "Payment failed");
+        return;
+    }
 
     alert("Payment successful");
-    location.reload();
-}
 
-function dummyCard() {
-    alert("Credit / Debit Card payment (demo only)");
+    location.reload();
 }
 
 async function markPaid() {
