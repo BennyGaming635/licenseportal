@@ -1,0 +1,62 @@
+<html>
+    <head>
+        <title>Staff Login</title>
+
+        <style>
+            body {
+                background: #111;
+                color: white;
+                font-family: Arial;
+                height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                margin: 0;
+            }
+
+            .card {
+                background: #222;
+                padding: 40px;
+                border-radius: 20px;
+                width: 350px;
+                text-align: center;
+            }
+
+            input {
+                width: 100%;
+                padding: 15px;
+                font-size: 22px;
+                border: none;
+                border-radius: 10px;
+                margin-bottom: 20px;
+                box-sizing: border-box;
+            }
+
+            button {
+                width: 100%;
+                padding: 15px;
+                font-size: 20px;
+                border: none;
+                border-radius: 10px;
+                cursor: pointer;
+            }
+
+            .error {
+                color: #ff6666;
+                margin-bottom: 15px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="card">
+            <h1>Staff Login</h1>
+            {% if error %}
+            <div class="error">{{ error }}</div>
+            {% endif %}
+            <form method="POST">
+                <input type="password" name="code" placeholder="Enter staff code" required>
+                <button type="submit">Login</button>
+            </form>
+        </div>
+    </body>
+</html>

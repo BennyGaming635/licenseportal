@@ -1,10 +1,12 @@
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, redirect, session
 import sqlite3
 import time
 
 COST_PER_MINUTE = 0.05
+STAFF_CODE = "1234"
 
 app = Flask(__name__)
+app.secret_key = "supersecretkey"
 
 ticket_number = 0
 
@@ -29,8 +31,29 @@ init_db()
 def kiosk():
     return render_template("kiosk.html")
 
+@app.route("/staff-login", methods=["GET", "POST"])
+def staff_login():
+    error = None
+    
+    if request.method == "POST":
+        code = request.form.get("code")
+        if code == STAFF_CODE:
+            session["staff_logged_in"] = True
+            return redirect("/staff")
+        else:
+            error = "Invalid code. Please try again."
+    return render_template("staff_login.html", error=error)
+
+@app.route("/staff-logout")
+def staff_logout():
+    session.clear()
+    return redirect("/staff-login")
+
 @app.route("/staff")
 def staff():
+    if "staff_logged_in" not in session:
+        return redirect("/staff-login")
+
     conn = sqlite3.connect("tickets.db")
     c = conn.cursor()
     c.execute("""
