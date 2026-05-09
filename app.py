@@ -29,6 +29,36 @@ init_db()
 def kiosk():
     return render_template("kiosk.html")
 
+@app.route("/staff")
+def staff():
+    conn = sqlite3.connect("tickets.db")
+    c = conn.cursor()
+    c.execute("""
+        SELECT code, paid, entry_time
+        FROM tickets
+        ORDER BY entry_time DESC
+    """)
+
+    tickets = c.fetchall()
+    conn.close()
+    ticket_data = []
+    now = int(time.time())
+    
+    for ticket in tickets:
+        code, paid, entry_time = ticket
+        minutes = max(1, (now - entry_time) // 60)
+        amount = 0 if paid else round(minutes * COST_PER_MINUTE, 2)
+
+        ticket_data.append({
+            "code": code,
+            "paid": bool(paid),
+            "minutes": minutes,
+            "amount_due": amount,
+            "entry_time": entry_time
+        })
+
+    return render_template("staff.html", tickets=ticket_data)
+
 @app.route("/generate_ticket")
 def generate_ticket():
     global ticket_number
