@@ -11,6 +11,7 @@ app.secret_key = "supersecretkey"
 ticket_number = 0
 
 def init_db():
+
     conn = sqlite3.connect("tickets.db")
     c = conn.cursor()
 
@@ -18,8 +19,21 @@ def init_db():
         CREATE TABLE IF NOT EXISTS tickets (
             code TEXT PRIMARY KEY,
             paid INTEGER DEFAULT 0,
-            entry_time INTEGER
+            entry_time INTEGER,
+            price REAL
         )
+    """)
+
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS meta (
+            key TEXT PRIMARY KEY,
+            value INTEGER
+        )
+    """)
+
+    c.execute("""
+        INSERT OR IGNORE INTO meta (key, value)
+        VALUES ('ticket', 40)
     """)
 
     conn.commit()
@@ -84,18 +98,28 @@ def staff():
 
 @app.route("/generate_ticket")
 def generate_ticket():
-    global ticket_number
-
-    ticket_number += 1
-    code = f"A{ticket_number}"
 
     conn = sqlite3.connect("tickets.db")
     c = conn.cursor()
+    c.execute("""
+              SELECT value FROM meta WHERE key ='ticket'
+    """)
 
-    c.execute(
-        "INSERT INTO tickets (code, entry_time) VALUES (?, ?)",
-        (code, int(time.time()))
-    )
+    row = c.fetchone()
+    number = row[0] if row else 40
+    new_number = number + 1
+    code = f"A{new_number}"
+    entry_time = int(time.time())
+    initial_price = 0
+
+    c.execute("""
+        UPDATE meta SET value=? WHERE key='ticket'
+    """, (new_number,))
+    
+    c.execute("""
+        INSERT INTO tickets (code, paid, entry_Time, price)
+        VALUES (?, ?, ?, ?)
+    """, (code, 0, entry_time, initial_price))
 
     conn.commit()
     conn.close()
