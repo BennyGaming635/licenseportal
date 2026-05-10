@@ -1,0 +1,53 @@
+<html>
+    <head>
+        <title>License Portal | Internal Logs</title>
+        <meta>http-equiv="refresh" content="5">
+        <style>
+            body {
+                background: #111;
+                color: white;
+                font-family: Arial;
+                margin: 0;
+                padding: 30px;
+            }
+
+            h1 {
+                margin-top: 0;
+            }
+
+            .log {
+                background: #222;
+                padding: 15px;
+                margin-bottom: 10px;
+                border-radius: 10px;
+            }
+
+            .time {
+                color: #888;
+                font-size: 14px;
+                margin-bottom: 5px;
+            }
+
+            a {
+                color: #00ccff;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Internal Logs</h1>
+        <p><a href="/staff">
+            Back to All Tickets
+        </a></p>
+        {% for log in logs%}
+        <div class="log">
+            <div class="time">
+                {{ log.time }}
+            </div>
+            <div>
+                {{ log.message }}
+            </div>
+        </div>
+
+        {% endfor %}
+    </body>
+</html>
