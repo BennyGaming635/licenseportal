@@ -19,8 +19,8 @@ def init_db():
     c = conn.cursor()
 
     c.execute("""
-        CREATE  TABLE IF NOT EXISTS logs (
-            id INTEGER PRIMARY LKEY AUTOINCREMENT,
+        CREATE TABLE IF NOT EXISTS logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
             timestamp INTEGER,
             message TEXT
             )
