@@ -50,7 +50,7 @@ def kiosk():
 def exit_terminal():
     return render_template("exit.html")
 
-@app.route("/exit-check", methods=["POST"])
+@app.route("/exit_check", methods=["POST"])
 def exit_check():
     data = request.get_json(silent=True) or {}
     code = data.get("code")
@@ -100,7 +100,7 @@ def exit_check():
         "total": total_due
     })
 
-@app.route("/exit-pay", methods=["POST"])
+@app.route("/exit_pay", methods=["POST"])
 def exit_pay():
     data = request.get_json(silent=True) or {}
     code = data.get("code")
@@ -368,5 +368,6 @@ def price():
         "amount": amount,
         "minutes": minutes
     })
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
