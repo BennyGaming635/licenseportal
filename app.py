@@ -4,6 +4,7 @@ import time
 
 COST_PER_MINUTE = 0.05
 STAFF_CODE = "1234"
+UNPAID_EXIT_FEE = 6.70 ## Yes I really just did 67, for the memes but whatever.
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
@@ -44,6 +45,102 @@ init_db()
 @app.route("/")
 def kiosk():
     return render_template("kiosk.html")
+
+@app.route("/exit")
+def exit_terminal():
+    return render_template("exit.html")
+
+@app.route("/exit-check", methods=["POST"])
+def exit_check():
+    data = request.get_json(silent=True) or {}
+    code = data.get("code")
+
+    if not code:
+        return jsonify({
+            "success": False,
+            "error": "No ticket code"
+        }), 400
+    
+    conn = sqlite3.connect("tickets.db")
+    c = conn.cursor()
+
+    c.execute("""
+        SELECT paid, entry_time, price
+        FROM tickets
+        WHERE code = ?
+    """, (code,))
+
+    ticket = c.fetchone()
+    conn.close()
+
+    if not ticket:
+        return jsonify({
+            "success": False,
+            "error": "Ticket not found"
+        }), 404
+    
+    paid, entry_time, stored_price = ticket
+    if paid:
+        return jsonify({
+            "success": True,
+            "paid": True,
+            "message": "Gate Open"
+        })
+    
+    total_due = round(
+        stored_price + UNPAID_EXIT_FEE,
+        2
+    )
+
+    return jsonify({
+        "success": True,
+        "paid": False,
+        "parking": stored_price,
+        "exit_fee": UNPAID_EXIT_FEE,
+        "total": total_due
+    })
+
+@app.route("/exit-pay", methods=["POST"])
+def exit_pay():
+    data = request.get_json(silent=True) or {}
+    code = data.get("code")
+    auth = data.get("auth")
+    if auth != "1234":
+        return jsonify({
+            "success": False,
+            "error": "Invalid auth code"
+        }), 403
+
+    conn = sqlite3.connect("tickets.db")
+    c = conn.cursor()
+    c.execute("""
+        SELECT paid
+        FROM tickets
+        WHERE code = ?
+    """, (code,))
+
+    ticket = c.fetchone()
+    if not ticket:
+        conn.close()
+        return jsonify({
+            "success": False,
+            "error": "Ticket not found"
+        }), 404
+    
+    c.execute("""
+        UPDATE tickets
+        SET paid = 1
+        WHERE code = ?
+        """, (code,))
+    
+    conn.commit()
+    conn.close()
+
+    return jsonify({
+        "success": True,
+        "message": "Payment successful, gate opening"
+        })
+
 
 @app.route("/staff-login", methods=["GET", "POST"])
 def staff_login():
