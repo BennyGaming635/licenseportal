@@ -1,3 +1,5 @@
+import code
+
 from flask import Flask, render_template, jsonify, request, redirect, session
 import sqlite3
 import time
@@ -61,12 +63,42 @@ def add_log(message):
     conn.close()
 
 @app.route("/")
+
 def kiosk():
     return render_template("kiosk.html")
+add_log(f"Accessed kiosk page")
+
+@app.route("/staff/log")
+def staff_logs():
+    if not session.get("staff_logged_in"):
+        return redirect("/staff-login")
+    
+    conn = sqlite3.connect("tickets.db")
+    c = conn.cursor()
+
+    c.execute("""
+        SELECT timestamp, message
+        FROM logs
+        ORDER BY id DESC
+        LIMIT 200
+    """)
+
+    rows = c.fetchall()
+    conn.close()
+    formatted_logs = []
+    for row in rows:
+        ts, msg = row
+        formatted_logs.append({
+            "time": time.strftime("%d/%m/%Y %H:%M:%S", time.localtime(ts)),
+            "message": msg
+        })
+
+        return render_template("logs.html", logs=formatted_logs)
 
 @app.route("/exit")
 def exit_terminal():
     return render_template("exit.html")
+add_log(f"Accessed exit page")
 
 @app.route("/exit_check", methods=["POST"])
 def exit_check():
@@ -92,6 +124,7 @@ def exit_check():
     conn.close()
 
     if not ticket:
+        add_log(f"Failed exit check. Error: Ticket {code} not found")
         return jsonify({
             "success": False,
             "error": "Ticket not found"
@@ -99,6 +132,7 @@ def exit_check():
     
     paid, entry_time, stored_price = ticket
     if paid:
+        add_log(f"Exit check successful for ticket {code}. Ticket already paid, gate opening.")
         return jsonify({
             "success": True,
             "paid": True,
@@ -110,6 +144,7 @@ def exit_check():
         2
     )
 
+    add_log(f"Exit check for ticket {code}. Ticket unpaid, total due: ${total_due}")
     return jsonify({
         "success": True,
         "paid": False,
@@ -124,6 +159,7 @@ def exit_pay():
     code = data.get("code")
     auth = data.get("auth")
     if auth != "1234":
+        add_log(f"Failed exit payment attempt. Error: Invalid auth code {auth}")
         return jsonify({
             "success": False,
             "error": "Invalid auth code"
@@ -139,6 +175,7 @@ def exit_pay():
 
     ticket = c.fetchone()
     if not ticket:
+        add_log(f"Failed exit payment attempt. Error: Ticket {code} not found")
         conn.close()
         return jsonify({
             "success": False,
@@ -154,6 +191,7 @@ def exit_pay():
     conn.commit()
     conn.close()
 
+    add_log(f"Payment successful for ticket {code}. Gate opening.")
     return jsonify({
         "success": True,
         "message": "Payment successful, gate opening"
@@ -181,6 +219,7 @@ def staff_logout():
 @app.route("/staff")
 def staff():
     if "staff_logged_in" not in session:
+        add_log("Unauthorized access attempt to staff page. Redirected to login.")
         return redirect("/staff-login")
 
     conn = sqlite3.connect("tickets.db")
@@ -195,7 +234,7 @@ def staff():
     conn.close()
     ticket_data = []
     now = int(time.time())
-    
+    add_log(f"Fetching ticket data at {now}")
     for ticket in tickets:
         code, paid, entry_time = ticket
         minutes = max(1, (now - entry_time) // 60)
@@ -226,6 +265,7 @@ def generate_ticket():
     code = f"A{new_number}"
     entry_time = int(time.time())
     initial_price = 0
+    add_log(f"Generated ticket {code} at {entry_time}")
 
     c.execute("""
         UPDATE meta SET value=? WHERE key='ticket'
@@ -243,6 +283,7 @@ def generate_ticket():
 @app.route("/pay")
 def pay():
     return render_template("pay.html")
+add_log("Accessed pay page")
 
 @app.route("/check_ticket", methods=["POST"])
 def check_ticket():
@@ -250,11 +291,12 @@ def check_ticket():
     code = data.get("code")
 
     if not code:
+        add_log(f"Failed ticket code check. Error: No code provided")
         return jsonify({
             "success": False,
             "error": "No code provided"
         }), 400
-
+    
     conn = sqlite3.connect("tickets.db")
     c = conn.cursor()
 
@@ -267,12 +309,14 @@ def check_ticket():
     conn.close()
 
     if ticket is None:
+        add_log(f"Failed ticket code check. Error: Ticket {code} not found")
         return jsonify({
             "success": False,
             "error": "Ticket not found"
         }), 404
 
     return jsonify({"success": True, "code": ticket[0], "paid": bool(ticket[1])})
+    add_log(f"Successful ticket code check for ticket {code}")
 
 @app.route("/mark_paid", methods=["POST"])
 def mark_paid():
@@ -282,7 +326,7 @@ def mark_paid():
     code = data.get("code")
 
     if not code:
-
+        add_log(f"Failed to mark ticket as paid. Error: No code provided")
         return jsonify({
             "success": False,
             "error": "No code provided"
@@ -303,7 +347,7 @@ def mark_paid():
     ticket = c.fetchone()
 
     if ticket is None:
-
+        add_log(f"Unable to mark ticket as paid. Error: Ticket {code} not found")
         conn.close()
 
         return jsonify({
@@ -315,6 +359,7 @@ def mark_paid():
 
     if paid:
 
+        add_log(f"Failed to mark ticket as paid. Error: Ticket {code} already paid")
         conn.close()
 
         return jsonify({
@@ -334,9 +379,11 @@ def mark_paid():
     conn.commit()
     conn.close()
 
+    add_log(f"Marked ticket {code} as paid successfully") 
     return jsonify({
         "success": True
     })
+
 
 @app.route("/price", methods=["POST"])
 def price():
@@ -344,6 +391,7 @@ def price():
     code = data.get("code")
 
     if not code:
+        add_log(f"Failed to calculate price. Error: No code provided")
         return jsonify({
             "success": False,
             "error": "No code provided"
@@ -364,6 +412,7 @@ def price():
     conn.close()
 
     if ticket is None:
+        add_log(f"Failed to calculate price. Error: Ticket {code} not found")
         return jsonify({
             "success": False,
             "error": "Ticket not found"
@@ -381,6 +430,7 @@ def price():
     minutes = max(1,(now - entry_time) // 60)
 
     amount = round(minutes * COST_PER_MINUTE, 2)
+    add_log(f"Calculated price for ticket {code}: ${amount} for {minutes} minutes")
     return jsonify({
         "success": True,
         "amount": amount,
