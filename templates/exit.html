@@ -15,6 +15,60 @@
             margin: 0;
         }
 
+        .display {
+            background: black;
+            color: #00ff99;
+            font-size: 42px;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            letter-spacing: 4px;
+        }
+        
+        .keypad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .keypad button {
+
+            height: 90px;
+            font-size: 32px;
+            border: none;
+            border-radius: 15px;
+            background: #333;
+            color: white;
+            cursor: pointer;
+        }
+
+        .keypad button:active {
+            transform: scale(0.95);
+        }
+
+        .continue-btn {
+            width: 100%;
+            height: 80px;
+            font-size: 28px;
+            border: none;
+            border-radius: 15px;
+        }
+
+        .popup {
+            position: fixed;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ff4444;
+            color: white;
+            padding: 20px 35px;
+            border-radius: 15px;
+            font-size: 24px;
+            z-index: 9999;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+        }
+
         .card {
             background: #222;
             padding: 40px;
@@ -58,6 +112,9 @@
 </head>
 
 <body>
+<div id="popup" class="popup hidden">
+    <span id="popup-text"></span>
+</div>
 
 <div class="card">
 
@@ -65,18 +122,29 @@
 
         <h1>Exit Terminal</h1>
 
-        <input
-            type="text"
-            id="ticket-code"
-            placeholder="Enter Ticket Code"
-        >
+        <div class="display" id="ticket-display">
+            ENTER TICKET
+        </div>
 
-        <button onclick="checkExit()">
-            Continue
+        <div class="keypad">
+
+            <button onclick="pressKey('1')">1</button>
+            <button onclick="pressKey('2')">2</button>
+            <button onclick="pressKey('3')">3</button>
+            <button onclick="pressKey('4')">4</button>
+            <button onclick="pressKey('5')">5</button>
+            <button onclick="pressKey('6')">6</button>
+            <button onclick="pressKey('7')">7</button>
+            <button onclick="pressKey('8')">8</button>
+            <button onclick="pressKey('9')">9</button>
+            <button onclick="pressKey('A')">A</button>
+            <button onclick="pressKey('0')">0</button>
+            <button onclick="backspaceKey()">⌫</button>
+        </div>
+        <button class="continue-btn" onclick="checkExit()">
+            CONTINUE
         </button>
-
     </div>
-
     <div id="screen2" class="hidden">
 
         <h1 class="success">
@@ -122,16 +190,56 @@
 </div>
 
 <script>
+let enteredCode = "";
+
+function pressKey(key) {
+
+    if (enteredCode.length >= 8)
+        return;
+
+    enteredCode += key;
+
+    updateDisplay();
+}
+
+function backspaceKey() {
+
+    enteredCode =
+        enteredCode.slice(0, -1);
+
+    updateDisplay();
+}
+
+function updateDisplay() {
+
+    const display =
+        document.getElementById("ticket-display");
+
+    if (enteredCode.length === 0) {
+
+        display.innerText = "ENTER TICKET";
+
+    } else {
+
+        display.innerText = enteredCode;
+    }
+}
+
+function showPopup(message) {
+    const popup = document.getElementById("popup");
+    const text = document.getElementById("popup-text");
+    text.innerText = message;
+    popup.classList.remove("hidden");
+    setTimeout(() => {
+        popup.classList.add("hidden");
+    }, 3000);
+}
 
 let currentTicket = null;
 
 async function checkExit() {
 
-    const code = document
-        .getElementById("ticket-code")
-        .value
-        .trim();
-
+    const code = enteredCode.trim();
     const response = await fetch("/exit_check", {
         method: "POST",
         headers: {
@@ -146,19 +254,16 @@ async function checkExit() {
 
     if (!data.success) {
 
-        alert(data.error || "Invalid ticket");
+        showPopup(data.error || "Invalid ticket");
         return;
     }
 
     currentTicket = code;
-
     document
         .getElementById("screen1")
         .classList.add("hidden");
 
-    // already paid
     if (data.paid) {
-
         document
             .getElementById("screen2")
             .classList.remove("hidden");
@@ -166,22 +271,18 @@ async function checkExit() {
         return;
     }
 
-    // unpaid
     document
         .getElementById("parking-amount")
         .innerText =
             "$" + data.parking.toFixed(2);
-
     document
         .getElementById("exit-fee")
         .innerText =
             "$" + data.exit_fee.toFixed(2);
-
     document
         .getElementById("total-due")
         .innerText =
             "$" + data.total.toFixed(2);
-
     document
         .getElementById("screen3")
         .classList.remove("hidden");
@@ -205,19 +306,16 @@ async function payExit() {
     });
 
     const data = await response.json();
-
     if (!data.success) {
 
-        alert(data.error || "Payment failed");
+        showPopup(data.error || "Payment failed. Please try again.");
         return;
     }
 
-    alert(data.message);
-
+    showPopup(data.message);
     location.reload();
 }
 
 </script>
-
 </body>
 </html>
