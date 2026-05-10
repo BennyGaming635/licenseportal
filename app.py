@@ -17,6 +17,14 @@ def init_db():
     c = conn.cursor()
 
     c.execute("""
+        CREATE  TABLE IF NOT EXISTS logs (
+            id INTEGER PRIMARY LKEY AUTOINCREMENT,
+            timestamp INTEGER,
+            message TEXT
+            )
+        """)
+
+    c.execute("""
         CREATE TABLE IF NOT EXISTS tickets (
             code TEXT PRIMARY KEY,
             paid INTEGER DEFAULT 0,
@@ -41,6 +49,16 @@ def init_db():
     conn.close()
 
 init_db()
+
+def add_log(message):
+    conn = sqlite3.connect("tickets.db")
+    c = conn.cursor()
+    c.execute("""
+        INSERT INTO logs (timestamp, message)
+        VALUES (?, ?)
+    """, (int(time.time()), message))
+    conn.commit()
+    conn.close()
 
 @app.route("/")
 def kiosk():
