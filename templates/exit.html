@@ -139,7 +139,7 @@
             <button onclick="pressKey('9')">9</button>
             <button onclick="pressKey('A')">A</button>
             <button onclick="pressKey('0')">0</button>
-            <button onclick="backspaceKey()">⌫</button>
+            <button onclick="clearKey()">C</button>
         </div>
         <button class="continue-btn" onclick="checkExit()">
             CONTINUE
@@ -158,40 +158,47 @@
     </div>
 
     <div id="screen3" class="hidden">
-
-        <h1 class="warning">
-            Payment Required
-        </h1>
-
         <p>
             Parking: <b id="parking-amount"></b>
         </p>
-
         <p>
-            Exit Fee: <b id="exit-fee"></b>
-        </p>
-
+            Exit Fee: <b id="exit-fee"></b></p>
         <p>
-            Total Due: <b id="total-due"></b>
-        </p>
+            Total Due: <b id="total-due"></b></p>
+        <div id="auth-display" class="display">
+            ENTER AUTH CODE
+        </div>
 
-        <input
-            type="password"
-            id="auth-code"
-            placeholder="Enter Auth Code"
-        >
+        <div class="keypad">
+
+            <button onclick="pressAuth('1')">1</button>
+            <button onclick="pressAuth('2')">2</button>
+            <button onclick="pressAuth('3')">3</button>
+
+            <button onclick="pressAuth('4')">4</button>
+            <button onclick="pressAuth('5')">5</button>
+            <button onclick="pressAuth('6')">6</button>
+
+            <button onclick="pressAuth('7')">7</button>
+            <button onclick="pressAuth('8')">8</button>
+            <button onclick="pressAuth('9')">9</button>
+
+            <button onclick="clearAuth()">C</button>
+            <button onclick="pressAuth('0')">0</button>
+            <button onclick="backAuth()">⌫</button>
+
+        </div>
 
         <button onclick="payExit()">
             Pay & Exit
         </button>
-
     </div>
 
 </div>
 
 <script>
 let enteredCode = "";
-
+let authCode = "";
 function pressKey(key) {
 
     if (enteredCode.length >= 8)
@@ -202,11 +209,8 @@ function pressKey(key) {
     updateDisplay();
 }
 
-function backspaceKey() {
-
-    enteredCode =
-        enteredCode.slice(0, -1);
-
+function clearKey() {
+    enteredCode = "";
     updateDisplay();
 }
 
@@ -287,13 +291,36 @@ async function checkExit() {
         .getElementById("screen3")
         .classList.remove("hidden");
 }
+function pressAuth(key) {
 
+    if (authCode.length >= 6) return;
+
+    authCode += key;
+    updateAuthDisplay();
+}
+function backAuth() {
+
+    authCode = authCode.slice(0, -1);
+    updateAuthDisplay();
+}
+function clearAuth() {
+
+    authCode = "";
+    updateAuthDisplay();
+}
+function updateAuthDisplay() {
+
+    const display = document.getElementById("auth-display");
+
+    if (authCode.length === 0) {
+        display.innerText = "AUTH CODE";
+    } else {
+        display.innerText = authCode;
+    }
+}
 async function payExit() {
 
-    const auth = document
-        .getElementById("auth-code")
-        .value;
-
+    const auth = authCode;
     const response = await fetch("/exit_pay", {
         method: "POST",
         headers: {

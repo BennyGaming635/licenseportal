@@ -4,7 +4,7 @@ from flask import Flask, render_template, jsonify, request, redirect, session
 import sqlite3
 import time
 
-COST_PER_MINUTE = 0.05
+COST_PER_MINUTE = 6.50
 STAFF_CODE = "1234"
 UNPAID_EXIT_FEE = 6.70 ## Yes I really just did 67, for the memes but whatever.
 
