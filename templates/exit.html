@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Exit Terminal</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: #111;
+            color: white;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+        }
+
+        .card {
+            background: #222;
+            padding: 40px;
+            border-radius: 20px;
+            width: 420px;
+            text-align: center;
+        }
+
+        input {
+            width: 100%;
+            padding: 15px;
+            font-size: 22px;
+            border: none;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            font-size: 20px;
+            border: none;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            cursor: pointer;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .success {
+            color: #00ff99;
+        }
+
+        .warning {
+            color: #ffcc00;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="card">
+
+    <div id="screen1">
+
+        <h1>Exit Terminal</h1>
+
+        <input
+            type="text"
+            id="ticket-code"
+            placeholder="Enter Ticket Code"
+        >
+
+        <button onclick="checkExit()">
+            Continue
+        </button>
+
+    </div>
+
+    <div id="screen2" class="hidden">
+
+        <h1 class="success">
+            Gate Open
+        </h1>
+
+        <p>
+            Thank you
+        </p>
+
+    </div>
+
+    <div id="screen3" class="hidden">
+
+        <h1 class="warning">
+            Payment Required
+        </h1>
+
+        <p>
+            Parking: <b id="parking-amount"></b>
+        </p>
+
+        <p>
+            Exit Fee: <b id="exit-fee"></b>
+        </p>
+
+        <p>
+            Total Due: <b id="total-due"></b>
+        </p>
+
+        <input
+            type="password"
+            id="auth-code"
+            placeholder="Enter Auth Code"
+        >
+
+        <button onclick="payExit()">
+            Pay & Exit
+        </button>
+
+    </div>
+
+</div>
+
+<script>
+
+let currentTicket = null;
+
+async function checkExit() {
+
+    const code = document
+        .getElementById("ticket-code")
+        .value
+        .trim();
+
+    const response = await fetch("/exit_check", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            code: code
+        })
+    });
+
+    const data = await response.json();
+
+    if (!data.success) {
+
+        alert(data.error || "Invalid ticket");
+        return;
+    }
+
+    currentTicket = code;
+
+    document
+        .getElementById("screen1")
+        .classList.add("hidden");
+
+    // already paid
+    if (data.paid) {
+
+        document
+            .getElementById("screen2")
+            .classList.remove("hidden");
+
+        return;
+    }
+
+    // unpaid
+    document
+        .getElementById("parking-amount")
+        .innerText =
+            "$" + data.parking.toFixed(2);
+
+    document
+        .getElementById("exit-fee")
+        .innerText =
+            "$" + data.exit_fee.toFixed(2);
+
+    document
+        .getElementById("total-due")
+        .innerText =
+            "$" + data.total.toFixed(2);
+
+    document
+        .getElementById("screen3")
+        .classList.remove("hidden");
+}
+
+async function payExit() {
+
+    const auth = document
+        .getElementById("auth-code")
+        .value;
+
+    const response = await fetch("/exit_pay", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            code: currentTicket,
+            auth: auth
+        })
+    });
+
+    const data = await response.json();
+
+    if (!data.success) {
+
+        alert(data.error || "Payment failed");
+        return;
+    }
+
+    alert(data.message);
+
+    location.reload();
+}
+
+</script>
+
+</body>
+</html>
