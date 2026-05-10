@@ -30,6 +30,7 @@ def init_db():
         CREATE TABLE IF NOT EXISTS tickets (
             code TEXT PRIMARY KEY,
             paid INTEGER DEFAULT 0,
+            exited INTEGER DEFAULT 0,
             entry_time INTEGER,
             price REAL
         )
@@ -115,7 +116,7 @@ def exit_check():
     c = conn.cursor()
 
     c.execute("""
-        SELECT paid, entry_time, price
+        SELECT paid, exited, entry_time, price
         FROM tickets
         WHERE code = ?
     """, (code,))
@@ -130,9 +131,30 @@ def exit_check():
             "error": "Ticket not found"
         }), 404
     
-    paid, entry_time, stored_price = ticket
+    paid, exited, entry_time, stored_price = ticket
+    if exited:
+        add_log(f"Automatically rejected ticket due to a reused code. The code was {code}.")
+        return jsonify({
+            "success": False,
+            "error": "This ticket has been used"
+        }), 403
+    
     if paid:
         add_log(f"Exit check successful for ticket {code}. Ticket already paid, gate opening.")
+        conn = sqlite3.connect("tickets.db")
+        c = conn.cursor()
+
+        c.execute("""
+            UPDATE tickets
+            SET exited = 1
+            WHERE code = ?
+        """, (code,))
+
+        conn.commit()
+        conn.close()
+
+        add_log(f"Gate opened for ticket {code}")
+
         return jsonify({
             "success": True,
             "paid": True,
@@ -184,7 +206,8 @@ def exit_pay():
     
     c.execute("""
         UPDATE tickets
-        SET paid = 1
+        SET paid = 1,
+        exited = 1
         WHERE code = ?
         """, (code,))
     
