@@ -292,7 +292,7 @@ def staff():
     conn = sqlite3.connect("tickets.db")
     c = conn.cursor()
     c.execute("""
-        SELECT code, paid, entry_time
+        SELECT code, paid, entry_time, exited
         FROM tickets
         ORDER BY entry_time DESC
     """)
@@ -303,7 +303,7 @@ def staff():
     now = int(time.time())
     add_log(f"Fetching ticket data at {now}")
     for ticket in tickets:
-        code, paid, entry_time = ticket
+        code, paid, entry_time, exited = ticket
         minutes = max(1, (now - entry_time) // 60)
         amount = 0 if paid else round(minutes * COST_PER_MINUTE, 2)
 

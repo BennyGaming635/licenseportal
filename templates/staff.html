@@ -75,14 +75,14 @@
                 <th>Amount Due</th>
                 <th>Actions</th>
             </tr>
-
             {% for ticket in tickets %}
-
             <tr>
                 <td>{{ ticket.code }}</td>
                 <td>
-                    {% if ticket.paid %}
-                    <span class="paid">PAID</span>
+                    {% if ticket.paid and ticket.exited %}
+                    <span style="color:#ff4444; font-weight:bold;">EXITED</span>
+                    {% elif ticket.paid %}
+                    <span style="color:#00aaff; font-weight:bold;">RDY EXIT</span>
                     {% else %}
                     <span class="unpaid">UNPAID</span>
                     {% endif %}
