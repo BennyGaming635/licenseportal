@@ -72,8 +72,8 @@
             <tr>
                 <th>Ticket</th>
                 <th>Status</th>
-                <th>Minutes</th>
                 <th>Amount Due</th>
+                <th>Actions</th>
             </tr>
 
             {% for ticket in tickets %}
@@ -87,8 +87,12 @@
                     <span class="unpaid">UNPAID</span>
                     {% endif %}
                 </td>
-                <td>{{ ticket.minutes }}</td>
                 <td>${{ "%.2f"|format(ticket.amount_due) }}</td>
+                <td>
+                    {% if not ticket.paid %}
+                    <button onclick="waiveTicket('{{ ticket.code }}')">Waive Fee</button>
+                    {% endif %}
+                </td>
             </tr>
             {% endfor %}
         </table>

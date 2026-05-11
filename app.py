@@ -69,6 +69,50 @@ def kiosk():
     return render_template("kiosk.html")
 add_log(f"Accessed kiosk page")
 
+@app.route("/waive_ticket", methods=["POST"])
+def waive_ticket():
+    if not session.get("staff_logged_in"):
+        return jsonify({
+            "success": False,
+            "error": "Unauthorized"
+        }), 403
+    data = request.get_json(silent=True) or {}
+    code = data.get("code")
+    if not code:
+        return jsonify({
+            "success": False,
+            "error": "No ticket code provided"
+        }), 400
+    conn = sqlite3.connect("tickets.db")
+    c = conn.cursor()
+    c.execute("""
+        SELECT code
+        FROM tickets
+        WHERE code = ?
+    """, (code,))
+
+    ticket = c.fetchone()
+    if not ticket:
+        conn.close()
+        return jsonify({
+            "success": False,
+            "error": "Ticket not found"
+        }), 404
+    
+    c.execute("""
+        UPDATE tickets
+        SET price = 0,
+            paid = 1
+        WHERE code = ?
+    """, (code,))
+
+    conn.commit()
+    conn.close()
+    add_log(f"Waived parking fee for ticket {code}")
+    return jsonify({
+        "success": True
+    })
+
 @app.route("/staff/log")
 def staff_logs():
     if not session.get("staff_logged_in"):
