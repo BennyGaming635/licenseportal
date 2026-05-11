@@ -92,5 +92,41 @@
             </tr>
             {% endfor %}
         </table>
+    <script>
+        async function waiveTicket(code) {
+
+            const confirmWaive = confirm(
+                "Waive fees for ticket " + code + "?"
+            );
+
+            if (!confirmWaive)
+                return;
+
+            const response = await fetch(
+                "/waive_ticket",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        code: code
+                    })
+                }
+            );
+
+            const data = await response.json();
+
+            if (!data.success) {
+
+                alert(data.error || "Failed");
+                return;
+            }
+
+            alert("Ticket waived");
+
+            location.reload();
+        }
+    </script>
     </body>
 </html>
