@@ -283,6 +283,54 @@ def staff_logout():
     session.clear()
     return redirect("/staff-login")
 
+@app.route("/staff/terminal")
+def staff_terminal():
+    if not session.get("staff_logged_in"):
+        add_log("Unauthorized access attempt to staff terminal. Redirected to login.")
+        return redirect("/staff-login")
+    output = ""
+
+    if request.method == "POST":
+        cmd = request.form.get("cmd", "").strip().lower()
+        conn = sqlite3.connect("tickets.db")
+        c = conn.cursor()
+
+        if cmd.startswith("show tickets"):
+            c.execute("SELECT code, paid, exited FROM tickets")
+            rows = c.fetchall()
+            output = "\n".join(
+                [f"{r[0]} | paid={r[1]} | exited={r[2]}" for r in rows]
+            )
+
+        elif cmd.startswith("waive "):
+            code = cmd.replace("waive ", "").strip()
+            c.execute("""
+                UPDATE tickets
+                SET price = 0, paid = 1
+                WHERE code = ?
+            """, (code,))
+
+            conn.commit()
+            add_log(f"Terminal console has waived ticket {code}")
+            output = f"Waived ticket {code}"
+        
+        elif cmd.startswith("open gate "):
+            code = cmd.replace("open gate ", "").strip()
+            add_log(f"Manually opened gate for ticket {code} using terminal console")
+            output = f"Gate opened for ticket {code}"
+
+        elif cmd == "help":
+            output = (
+                "Commands:\n"
+                "show tickets\n"
+                "waive <code>\n"
+                "open gate <code>\n"
+            )
+        else:
+            output = "Unknown command. Type 'help' for a list of commands."
+        conn.close()
+    return render_template("terminal.html", output=output)
+
 @app.route("/staff")
 def staff():
     if "staff_logged_in" not in session:
