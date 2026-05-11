@@ -310,6 +310,7 @@ def staff():
         ticket_data.append({
             "code": code,
             "paid": bool(paid),
+            "exited": bool(exited),
             "minutes": minutes,
             "amount_due": amount,
             "entry_time": entry_time
