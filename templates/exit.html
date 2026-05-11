@@ -268,10 +268,11 @@ async function checkExit() {
         .classList.add("hidden");
 
     if (data.paid) {
-        document
-            .getElementById("screen2")
-            .classList.remove("hidden");
-
+        document.getElementById("screen2").classList.remove("hidden");
+        showPopup("Gate opening...");
+        setTimeout(() => {
+            location.reload();
+        }, 4000);
         return;
     }
 
