@@ -3,15 +3,45 @@ import code
 from flask import Flask, render_template, jsonify, request, redirect, session
 import sqlite3
 import time
+from datetime import datetime
+
+LICENSE_NAME = "CHANGEME" ## Change this to your orgs name for licensing reasons.
 
 COST_PER_MINUTE = 6.50
+FIRST_15_MINUTES_FREE = True
+MAX_DAILY_RATE = 24.00
+EXIT_GRACE_MINUTES = 10
+PEAK_HOUR_ENABLED = True
+PEAK_HOUR_MULTIPLIER = 1.5
 STAFF_CODE = "1234"
 UNPAID_EXIT_FEE = 6.70 ## Yes I really just did 67, for the memes but whatever.
+PEAK_HOURS = {
+    (7, 9), ## this is just 7am to 9am
+    (16, 18) ## this one is just 4pm to 6pm tho
+}
+ticket_number = 0
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
 
-ticket_number = 0
+def calculate_price(entry_time):
+    now = int(time.time())
+    minutes = max(1, int((now - entry_time) // 60))
+
+    if FIRST_15_MINUTES_FREE and minutes <= 15:
+        return 0.0, minutes
+    price = minutes * COST_PER_MINUTE
+
+    if PEAK_HOUR_ENABLED:
+        current_hour = datetime.now().hour
+        for start, end in PEAK_HOURS:
+            if start <= current_hour < end:
+                price*= PEAK_HOUR_MULTIPLIER
+                break
+
+    if price > MAX_DAILY_RATE:
+        price = MAX_DAILY_RATE
+    return round(price, 2), minutes
 
 def init_db():
 
@@ -353,7 +383,7 @@ def staff():
     for ticket in tickets:
         code, paid, entry_time, exited = ticket
         minutes = max(1, (now - entry_time) // 60)
-        amount = 0 if paid else round(minutes * COST_PER_MINUTE, 2)
+        amount, minutes = 0 if paid else calculate_price(entry_time)
 
         ticket_data.append({
             "code": code,
@@ -545,7 +575,7 @@ def price():
     now = int(time.time())
     minutes = max(1,(now - entry_time) // 60)
 
-    amount = round(minutes * COST_PER_MINUTE, 2)
+    amount, minutes = calculate_price(entry_time)
     add_log(f"Calculated price for ticket {code}: ${amount} for {minutes} minutes")
     return jsonify({
         "success": True,
