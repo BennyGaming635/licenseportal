@@ -14,6 +14,105 @@
                 overflow: hidden;
             }
 
+            .printer {
+                width: 360px;
+                background: #222;
+                border-radius: 20px;
+                padding: 25px;
+                text-align: center;
+                box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            }
+
+            .printer-top {
+                font-size: 28px;
+                margin-bottom: 20px;
+                color: white;
+            }
+
+            .ticket-slot {
+                width: 100%;
+                height: 160px;
+                background: #111;
+                border-radius: 15px;
+                overflow: hidden;
+                position: relative;
+                margin-bottom: 20px;
+            }
+
+            .ticket-paper {
+                width: 85%;
+                margin: auto;
+                background: white;
+                color: black;
+                border-radius: 10px;
+                padding: 20px;
+                position: absolute;
+                left: 50%;
+                transform: translateX(-50%) translateY(-220px);
+                box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+            }
+
+            .ticket-paper.show {
+                animation: printTicket 2s forwards;
+            }
+
+            .ticket-label {
+                font-size: 18px;
+                margin-bottom: 15px;
+            }
+
+            .ticket-code {
+                font-size: 52px;
+                font-weight: bold;
+                letter-spacing: 5px;
+            }
+
+            .ticket-btn {
+
+                width: 100%;
+                height: 80px;
+
+                border: none;
+                border-radius: 15px;
+
+                background: #00ff99;
+                color: black;
+
+                font-size: 28px;
+                font-weight: bold;
+
+                cursor: pointer;
+            }
+
+            .ticket-btn:active {
+                transform: scale(0.97);
+            }
+
+            @keyframes printTicket {
+
+                0% {
+                    transform:
+                        translateX(-50%)
+                        translateY(-220px);
+                }
+
+                70% {
+                    transform:
+                        translateX(-50%)
+                        translateY(20px);
+                }
+
+                100% {
+                    transform:
+                        translateX(-50%)
+                        translateY(0px);
+                }
+            }
+
+            .hidden {
+                display: none;
+            }
+
             .arrow {
                 font-size: 120px;
                 animation: bounce 1s infinite;
@@ -40,21 +139,35 @@
         </style>
     </head>
     <body>
-        <div class="arrow">↓</div>
-        <button onclick="getTicket()">PRESS FOR TICKET</button>
-        <div id="ticket"></div>
+        <div class="printer">
+            <div class="printer-top">
+                PRESS FOR TICKET
+            </div>
+            <div class="ticket-slot">
+                <div id="ticket-paper" class="ticket-paper hidden">
+                    <div class="tiket-label">
+                        PARKING TICKET
+                    </div>
+                    <div id="ticket-code" class="ticket-code">
+                        A41
+                    </div>
+                </div>
+            </div>
+            <button class="ticket-btn" onclick="generateTicket()">GET TICKET</button>
+        </div>
         <script>
-            async function getTicket() {
-                const response = await fetch('/generate_ticket');
+            async function generateTicket() {
+                const response = await fetch("/generate_ticket");
                 const data = await response.json();
-
-                const ticket = document.getElementById('ticket');
-
-                ticket.innerText = data.code;
-                ticket.style.display = "block";
-
+                const ticketPaper = document.getElementById("ticket-paper");
+                const ticketCode = document.getElementById("ticket-code");
+                ticketCode.innerText = data.code;
+                ticketPaper.classList.remove("hidden");
+                ticketPaper.classList.add("show");
+                void ticketPaper.offsetWidth;
+                ticketPaper.classList.add("show");
                 setTimeout(() => {
-                    ticket.style.display = "none";
+                    ticketPaper.classList.add("hidden");
                 }, 5000);
             }
         </script>
