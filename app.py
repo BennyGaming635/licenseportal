@@ -383,7 +383,11 @@ def staff():
     for ticket in tickets:
         code, paid, entry_time, exited = ticket
         minutes = max(1, (now - entry_time) // 60)
-        amount, minutes = 0 if paid else calculate_price(entry_time)
+        if paid:
+            minutes = 0
+            amount = 0
+        else:
+            amount, minutes = calculate_price(entry_time)
 
         ticket_data.append({
             "code": code,
