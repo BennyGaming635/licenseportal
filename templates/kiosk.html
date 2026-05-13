@@ -164,6 +164,7 @@
                 ticketCode.innerText = data.code;
                 ticketPaper.classList.remove("hidden");
                 ticketPaper.classList.add("show");
+                document.getElementById("print").play();
                 void ticketPaper.offsetWidth;
                 ticketPaper.classList.add("show");
                 setTimeout(() => {
@@ -171,5 +172,8 @@
                 }, 5000);
             }
         </script>
+        <audio id="print">
+            <source src="audio/printer.mp3" type="audio/mpeg">
+        </audio>
     </body>
 </html>
