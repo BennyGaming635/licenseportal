@@ -46,10 +46,6 @@
             margin-bottom: 15px;
         }
 
-        .hidden {
-            display: none;
-        }
-
         .status {
             margin-bottom: 20px;
             font-size: 18px;
@@ -71,6 +67,32 @@
             font-size: 14px;
             opacity: 0.7;
             margin-top: 10px;
+        }
+
+        .eftpos-screen {
+            background: #111;
+            border: 3px solid #00ff99;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            width: 360px;
+        }
+
+        .eftpos-screen div {
+            margin: 15px 0;
+        }
+
+        #eftpos-status {
+            font-size: 20px;
+        }
+
+        #eftpos-amount {
+            font-size: 40px;
+            color: #00ff99;
+        }
+
+        .hidden {
+            display: none;
         }
     </style>
 </head>
@@ -145,10 +167,53 @@
     </div>
 
 </div>
+<div id="eftpos-terminal" class="hidden">
+    <div class="eftpos-screen">
+        <div id="eftpos-status">TAP / INSERT CARD</div>
+        <div id="eftpos-amount">$0.00</div>
+        <div id="eftpos-processing" class="hidden">PROCESSING...</div>
+        <div id="eftpos-approved" class="hidden">APPROVED</div>
+        <div id="eftpos-declined" class="hidden">DECLINED</div>
+    </div>
+</div>
 
 <script>
 
 let currentTicket = null;
+
+function runEftpos(amount, callback) {
+    const terminal = document.getElementById("eftpos-terminal");
+    const status = document.getElementById("eftpos-status");
+    const processing = document.getElementById("eftpos-processing");
+    const approved = document.getElementById("eftpos-approved");
+    terminal.classList.remove("hidden");
+    document.getElementById("eftpos-amount").innerText = "$" + amount.toFixed(2);
+    processing.classList.add("hidden");
+    approved.classList.add("hidden");
+    status.innerText = "TAP / INSERT CARD";
+    setTimeout(() => {
+        status.innerText = "PROCESSING...";
+        processing.classList.remove("hidden")
+        setTimeout(() => {
+            processing.classList.add("hidden");
+            approved.classList.remove("hidden");
+            status.innerText = "APPROVED";
+            setTimeout(() => {
+                terminal.classList.add("hidden");
+                callback();
+            }, 1000);
+        }, 1800);
+    }, 1000);
+}
+
+function dummyCard() {
+    const priceText = document.getElementById("amount-due").innerText;
+    const amount = parseFloat(priceText.replace(/[^0-9.]/g, ""));
+    runEftpos(amount, () => {
+        alert("Card payment approved");
+        location.reload();
+    });
+}
 
 async function checkTicket() {
 
@@ -241,32 +306,35 @@ async function completeDemoPayment() {
     const auth = document.getElementById("auth-code").value;
 
     if (auth !== "1234") {
-
         alert("Incorrect auth code");
         return;
     }
 
-    const response = await fetch("/mark_paid", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            code: currentTicket
-        })
+    const priceText = document.getElementById("amount-due").innerText;
+    const amount = parseFloat(priceText.replace(/[^0-9.]/g, ""));
+
+    runEftpos(amount, async () => {
+
+        const response = await fetch("/mark_paid", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                code: currentTicket
+            })
+        });
+
+        const data = await response.json();
+
+        if (!data.success) {
+            alert(data.error || "Payment failed");
+            return;
+        }
+
+        alert("Payment successful");
+        location.reload();
     });
-
-    const data = await response.json();
-
-    if (!data.success) {
-
-        alert(data.error || "Payment failed");
-        return;
-    }
-
-    alert("Payment successful");
-
-    location.reload();
 }
 
 async function markPaid() {
