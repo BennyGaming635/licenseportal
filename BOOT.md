@@ -39,7 +39,7 @@ The default is 6.70 (yes yes 67)
 
 ---
 
-## Change Staff Code
+### Change Staff Code
 >[!WARN]
 > It is **heavily recommended** that you change this code, do not leave it as the default '1234'
 
@@ -52,3 +52,37 @@ python app.py -sc <code>
 The default is 1234
 
 ---
+
+### Change PHM (Peak Hour Multiplier)
+
+In peak hours, you may want to multiply the price due to demand. To do this, use:
+
+```bash
+python app.py --peak <multiplier>
+```
+
+The default is 1.5 (x0.5 increase)
+
+---
+
+### Disable Peak Hour Pricing (and multiplier)
+
+If you would like to not have peak hour pricing, then use:
+
+```bash
+python app.py --dispeak
+```
+
+Nothing else is required.
+
+---
+
+### Disable First 15 Minutes free
+
+Some car parks may want to offer a free 15 minutes of parking, mainly for change of mind or for other reasons. If you don't want the grace period, use:
+
+```bash
+python app.py --disfree
+```
+
+If this is enabled, all time is billed instantly from the minute the ticket is issued.
