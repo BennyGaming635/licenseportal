@@ -644,7 +644,7 @@ if __name__ == "__main__":
     time.sleep(0.1)
     print("Starting LicensePortal v0.1")
     time.sleep(0.1)
-    print("This software is licensed to " + LICENSE_NAME + " .")
+    print("This software is licensed to " + LICENSE_NAME + " . (actually there is no license :P)")
     time.sleep(0.1)
     print("For support, please create a GitHub issue or contact @BennyGaming635")
     time.sleep(0.1)
