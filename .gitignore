@@ -1,1 +1,5 @@
 tickets.db
+/build/
+/dist/
+LicensePortal.spec
+__pycache__/
