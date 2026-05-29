@@ -24,6 +24,13 @@ parser.add_argument(
     help="Maximum daily rate"
 )
 
+parser.add_argument(
+    "--exitfee",
+    type=float,
+    default=6.70,
+    help="Unpaid exit fee"
+)
+
 COST_PER_MINUTE = 6.50
 FIRST_15_MINUTES_FREE = True
 MAX_DAILY_RATE = 24.00
