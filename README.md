@@ -9,7 +9,7 @@ Since it's just Flask and Python, it's pretty easy to set up. In fact, you can r
 1. Pull/download this repository
 2. Run the following command:
 (Requires Python to be installed)
-```
+```bash
 pip install -r requirements.txt
 ```
 3. Simply run the app.py script
