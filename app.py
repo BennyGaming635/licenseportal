@@ -45,6 +45,12 @@ parser.add_argument(
     help="Peak hour multiplier"
 )
 
+parser.add_argument(
+    "--dispeak",
+    action="store_true",
+    help="Disable peak hours"
+)
+
 COST_PER_MINUTE = 6.50
 FIRST_15_MINUTES_FREE = True
 MAX_DAILY_RATE = 24.00
