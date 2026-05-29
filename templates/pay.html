@@ -209,12 +209,27 @@ function runEftpos(amount, callback) {
 function dummyCard() {
     const priceText = document.getElementById("amount-due").innerText;
     const amount = parseFloat(priceText.replace(/[^0-9.]/g, ""));
-    runEftpos(amount, () => {
-        alert("Card payment approved");
+    
+    runEftpos(amount, async () => {
+        const response = await fetch("/mark_paid", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                code: currentTicket
+            })
+        });
+
+        const data = await response.json();
+        if (!data.success) {
+            alert(data.error || "Payment failed");
+            return;
+        }
+
         location.reload();
     });
 }
-
 async function checkTicket() {
 
     const code = document
