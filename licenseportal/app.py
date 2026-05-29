@@ -76,6 +76,9 @@ ticket_number = 0
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
 
+def create_app():
+    return app
+
 def calculate_price(entry_time):
     now = int(time.time())
     minutes = max(1, int((now - entry_time) // 60))
