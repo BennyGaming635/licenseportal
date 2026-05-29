@@ -57,14 +57,16 @@ parser.add_argument(
     help="Disable first 15 minutes free"
 )
 
-COST_PER_MINUTE = 6.50
-FIRST_15_MINUTES_FREE = True
-MAX_DAILY_RATE = 24.00
+args = parser.parse_args()
+
+COST_PER_MINUTE = args.cpm
+FIRST_15_MINUTES_FREE = not args.disfree
+MAX_DAILY_RATE = args.mdr
 EXIT_GRACE_MINUTES = 10
-PEAK_HOUR_ENABLED = True
-PEAK_HOUR_MULTIPLIER = 1.5
-STAFF_CODE = "1234"
-UNPAID_EXIT_FEE = 6.70 ## Yes I really just did 67, for the memes but whatever.
+PEAK_HOUR_ENABLED = not args.dispeak
+PEAK_HOUR_MULTIPLIER = args.peak
+STAFF_CODE = args.sc
+UNPAID_EXIT_FEE = args.exitfee ## Yes I really just did 67, for the memes but whatever.
 PEAK_HOURS = {
     (7, 9), ## this is just 7am to 9am
     (16, 18) ## this one is just 4pm to 6pm tho
