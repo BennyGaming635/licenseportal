@@ -38,6 +38,13 @@ parser.add_argument(
     help="Staff code for waiving tickets and exit payments"
 )
 
+parser.add_argument(
+    "--peak",
+    type=float,
+    default=1.5,
+    help="Peak hour multiplier"
+)
+
 COST_PER_MINUTE = 6.50
 FIRST_15_MINUTES_FREE = True
 MAX_DAILY_RATE = 24.00
