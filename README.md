@@ -15,11 +15,6 @@ pip install -r requirements.txt
 3. Simply run the app.py script or add boot arguments from [BOOT.md](BOOT.md).
 4. Visit the IP Address that is prompted in the Python window, the first IP Address is locally (your device only) and the second one is internally (your local network, accessible on local networked devices).
 
-# OR (if you are using the .exe)
-1. Download the .exe from Releases (on the side)
-2. Open it
-3. Visit the IP Address/Port you are given. (You can also still use the [BOOT.md](BOOT.MD) arguments from earlier!)
-
 ## Can I change any variables?
 Yes, and in fact you very much should change some variables. These can now be changed via boot arguments. Please [learn more here](BOOT.md).
 ## So how does it work?
