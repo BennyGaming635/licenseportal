@@ -3,3 +3,4 @@ tickets.db
 /dist/
 LicensePortal.spec
 __pycache__/
+/licenseportal.egg-info/
