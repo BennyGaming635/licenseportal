@@ -12,7 +12,7 @@ Since it's just Flask and Python, it's pretty easy to set up. In fact, you can r
 ```bash
 pip install -r requirements.txt
 ```
-3. Simply run the app.py script
+3. Simply run the app.py script or add boot arguments from [BOOT.md](BOOT.md).
 4. Visit the IP Address that is prompted in the Python window, the first IP Address is locally (your device only) and the second one is internally (your local network, accessible on local networked devices).
 
 ## Can I change any variables?
