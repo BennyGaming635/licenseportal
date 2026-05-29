@@ -31,6 +31,13 @@ parser.add_argument(
     help="Unpaid exit fee"
 )
 
+parser.add_argument(
+    "--sc",
+    type=str,
+    default="1234",
+    help="Staff code for waiving tickets and exit payments"
+)
+
 COST_PER_MINUTE = 6.50
 FIRST_15_MINUTES_FREE = True
 MAX_DAILY_RATE = 24.00
