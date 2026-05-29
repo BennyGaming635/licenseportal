@@ -8,7 +8,7 @@ import argparse
 
 LICENSE_NAME = "CHANGEME" ## Change this to your orgs name for licensing reasons.
 
-parser = argparse.ArgumentParse(description="LicensePortal Parking Management System")
+parser = argparse.ArgumentParser(description="LicensePortal Parking Management System")
 
 parser.add_argument(
     "--cpm",
