@@ -17,6 +17,13 @@ parser.add_argument(
     help="Parking cost per minute"
 )
 
+parser.add_argument(
+    "--mdr",
+    type=float,
+    default=24.00,
+    help="Maximum daily rate"
+)
+
 COST_PER_MINUTE = 6.50
 FIRST_15_MINUTES_FREE = True
 MAX_DAILY_RATE = 24.00
