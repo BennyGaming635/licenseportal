@@ -687,7 +687,7 @@ if __name__ == "__main__":
     print()
     print()
     print("=============================================")
-    print("             LICENSEPORTAL V0.1")
+    print("             LICENSEPORTAL V0.1.1")
     print("=============================================")
     time.sleep(0.5)
     print()
