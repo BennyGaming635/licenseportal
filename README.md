@@ -16,15 +16,7 @@ pip install -r requirements.txt
 4. Visit the IP Address that is prompted in the Python window, the first IP Address is locally (your device only) and the second one is internally (your local network, accessible on local networked devices).
 
 ## Can I change any variables?
-Yes, and in fact you very much should change some variables. I recommend you change the following variables which are listed below.
-```
-COST_PER_MINUTE = 0.00
-STAFF_CODE = "NUMERICAL CODE"
-UNPAID_EXIT_FEE = 0.00
-
-app = Flask(__name__)
-app.secret_key = "Use a SHA256 key here or something in production"
-
+Yes, and in fact you very much should change some variables. These can now be changed via boot arguments. Please [learn more here](BOOT.md).
 ## So how does it work?
 Glad you asked, this works by using Flask which hosts the local html files over the network, while SQLITE powers the database and Javascript in the .html files interact with Flask, which in turn talks to the SQLITE databases. (It looks confusing but on paper it gets simpler).
 
