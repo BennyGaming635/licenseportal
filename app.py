@@ -4,8 +4,11 @@ from flask import Flask, render_template, jsonify, request, redirect, session
 import sqlite3
 import time
 from datetime import datetime
+import argparse
 
 LICENSE_NAME = "CHANGEME" ## Change this to your orgs name for licensing reasons.
+
+parser = argparse.ArgumentParse(description="LicensePortal Parking Management System")
 
 COST_PER_MINUTE = 6.50
 FIRST_15_MINUTES_FREE = True
