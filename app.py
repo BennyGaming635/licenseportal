@@ -10,6 +10,13 @@ LICENSE_NAME = "CHANGEME" ## Change this to your orgs name for licensing reasons
 
 parser = argparse.ArgumentParse(description="LicensePortal Parking Management System")
 
+parser.add_argument(
+    "--cpm",
+    type=float,
+    default=6.50,
+    help="Parking cost per minute"
+)
+
 COST_PER_MINUTE = 6.50
 FIRST_15_MINUTES_FREE = True
 MAX_DAILY_RATE = 24.00
