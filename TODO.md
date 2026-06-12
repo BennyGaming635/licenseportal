@@ -22,9 +22,8 @@ This page is just a list of features I want to eventually add to LicensePortal.
 - [ ] link multiple servers
     - [ ] link servers on same network
     - [ ] link servers via WAN
-- [ ] mobile PWA app
-    - [ ] customer side for ticket payment on mobile
-    - [ ] staff side for analytics and ticket waivering or whatever idk
+- [x] mobile PWA app
+    - [x] customer side for ticket payment on mobile
 
 
 If you got any cool ideas lmk!
