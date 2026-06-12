@@ -108,7 +108,7 @@ def init_db():
     c.execute("""
         CREATE TABLE IF NOT EXISTS logs (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            timestamp INTEGER,
+            timestamp INTEGER,1
             message TEXT
             )
         """)
@@ -480,9 +480,9 @@ def generate_ticket():
     """, (new_number,))
     
     c.execute("""
-        INSERT INTO tickets (code, paid, entry_Time, price)
-        VALUES (?, ?, ?, ?)
-    """, (code, 0, entry_time, initial_price))
+        INSERT INTO tickets (code, paid, entry_Time, price, portal_id)
+        VALUES (?, ?, ?, ?, ?)
+    """, (code, 0, entry_time, initial_price, ENTRY_PORTAL_ID))
 
     conn.commit()
     conn.close()
