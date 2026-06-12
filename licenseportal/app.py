@@ -421,17 +421,26 @@ def staff_terminal():
 
 @app.route("/staff")
 def staff():
+    portal_filter = request.args.get("portal")
     if "staff_logged_in" not in session:
         add_log("Unauthorized access attempt to staff page. Redirected to login.")
         return redirect("/staff-login")
 
     conn = sqlite3.connect("tickets.db")
     c = conn.cursor()
-    c.execute("""
-        SELECT code, paid, entry_time, exited
-        FROM tickets
-        ORDER BY entry_time DESC
-    """)
+    if portal_filter:
+        c.execute("""
+            SELECT code, paid, entry_time, exited, portal_id
+            FROM tickets
+            WHERE portal_id = ?
+            ORDER BY entry_time DESC
+        """, (portal_filter,))
+    else:
+        c.execute("""
+            SELECT code, paid, entry_time, exited, portal_id
+            FROM tickets
+            ORDER BY entry_time DESC
+        """)
 
     tickets = c.fetchall()
     conn.close()
@@ -439,7 +448,7 @@ def staff():
     now = int(time.time())
     add_log(f"Fetching ticket data at {now}")
     for ticket in tickets:
-        code, paid, entry_time, exited = ticket
+        code, paid, entry_time, exited, portal_id = ticket
         minutes = max(1, (now - entry_time) // 60)
         if paid:
             minutes = 0
@@ -453,7 +462,8 @@ def staff():
             "exited": bool(exited),
             "minutes": minutes,
             "amount_due": amount,
-            "entry_time": entry_time
+            "entry_time": entry_time,
+            "portal_id": portal_id
         })
 
     return render_template("staff.html", tickets=ticket_data)
