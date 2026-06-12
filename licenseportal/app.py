@@ -108,7 +108,7 @@ def init_db():
     c.execute("""
         CREATE TABLE IF NOT EXISTS logs (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            timestamp INTEGER,1
+            timestamp INTEGER,
             message TEXT
             )
         """)
