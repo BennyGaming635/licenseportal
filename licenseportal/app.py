@@ -119,7 +119,8 @@ def init_db():
             paid INTEGER DEFAULT 0,
             exited INTEGER DEFAULT 0,
             entry_time INTEGER,
-            price REAL
+            price REAL,
+            portal_id TEXT
         )
     """)
 
