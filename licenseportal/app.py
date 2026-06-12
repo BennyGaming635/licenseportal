@@ -487,6 +487,10 @@ def generate_ticket():
 
 @app.route("/pay")
 def pay():
+    user_agent = parse(request.headers.get("User-Agent"))
+
+    if user_agent.is_mobile:
+        return render_template("mobile_pay.html")
     return render_template("pay.html")
 add_log("Accessed pay page")
 
