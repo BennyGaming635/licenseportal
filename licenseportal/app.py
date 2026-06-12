@@ -4,6 +4,7 @@ from flask import Flask, render_template, jsonify, request, redirect, session
 import sqlite3
 import time
 from datetime import datetime
+fron user_agents import parse
 import argparse
 
 LICENSE_NAME = "CHANGEME" ## Change this to your orgs name for licensing reasons.
@@ -500,7 +501,7 @@ def generate_ticket():
 
 @app.route("/pay")
 def pay():
-    user_agent = parser(request.headers.get("User-Agent"))
+    user_agent = parse(request.headers.get("User-Agent"))
 
     if user_agent.is_mobile:
         return render_template("mobile_pay.html")
