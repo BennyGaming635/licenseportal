@@ -7,6 +7,8 @@ from datetime import datetime
 import argparse
 
 LICENSE_NAME = "CHANGEME" ## Change this to your orgs name for licensing reasons.
+ENTRY_PORTAL_ID = "ENTRY-01"
+EXIT_PORTAL_ID = "EXIT-01"
 
 parser = argparse.ArgumentParser(description="LicensePortal Parking Management System")
 
