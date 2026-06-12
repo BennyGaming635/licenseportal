@@ -119,6 +119,10 @@
             Example codes: A41, A42...
         </div>
 
+        <div class="small-text">
+            <a href="/mobile/pay" style="color: #00ff99; text-decoration: none;">Open mobile payment</a>
+        </div>
+
     </div>
 
     <div id="screen2" class="hidden">
@@ -180,6 +184,13 @@
 <script>
 
 let currentTicket = null;
+
+const params = new URLSearchParams(window.location.search);
+const ticketParam = params.get("ticket");
+
+if (ticketParam) {
+    document.getElementById("ticket-code").value = ticketParam;
+}
 
 function runEftpos(amount, callback) {
     const terminal = document.getElementById("eftpos-terminal");

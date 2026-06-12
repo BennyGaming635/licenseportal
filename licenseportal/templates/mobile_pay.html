@@ -1,0 +1,496 @@
+<html>
+<head>
+    <title>Mobile Payment</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <style>
+        :root {
+            --bg: #081018;
+            --panel: #111c2a;
+            --panel-2: #152538;
+            --text: #f4f8ff;
+            --muted: #9fb0c6;
+            --accent: #00e6a8;
+            --accent-2: #67a8ff;
+            --danger: #ff6b7a;
+            --shadow: rgba(0, 0, 0, 0.35);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100vw;
+            min-height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            background:
+                radial-gradient(circle at top, rgba(103, 168, 255, 0.18), transparent 35%),
+                radial-gradient(circle at bottom right, rgba(0, 230, 168, 0.16), transparent 30%),
+                linear-gradient(180deg, #071019 0%, #0b1621 100%);
+            color: var(--text);
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            display: flex;
+            align-items: stretch;
+            justify-content: stretch;
+        }
+
+        .mobile-shell {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 16px;
+            gap: 14px;
+        }
+
+        .header, .panel, .payment-panel {
+            background: rgba(17, 28, 42, 0.92);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            box-shadow: 0 18px 40px var(--shadow);
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            border-radius: 24px;
+            padding: 18px 20px;
+        }
+
+        .brand {
+            font-size: 15px;
+            letter-spacing: 0.24em;
+            color: var(--muted);
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .title {
+            margin: 0;
+            font-size: clamp(26px, 7vw, 40px);
+            line-height: 1.05;
+        }
+
+        .subtitle {
+            margin: 8px 0 0;
+            color: var(--muted);
+            font-size: 15px;
+            line-height: 1.4;
+        }
+
+        .panel {
+            border-radius: 24px;
+            padding: 18px;
+            flex: 0 0 auto;
+        }
+
+        .ticket-label {
+            color: var(--muted);
+            font-size: 13px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .ticket-display {
+            min-height: 88px;
+            width: 100%;
+            border-radius: 20px;
+            border: 2px solid rgba(103, 168, 255, 0.25);
+            background: linear-gradient(180deg, rgba(21, 37, 56, 0.95), rgba(11, 22, 33, 0.96));
+            color: var(--text);
+            font-size: clamp(34px, 8vw, 54px);
+            font-weight: 700;
+            letter-spacing: 0.18em;
+            text-align: center;
+            padding: 20px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .ticket-display.placeholder {
+            color: rgba(255, 255, 255, 0.34);
+            letter-spacing: 0.08em;
+            font-size: clamp(18px, 5vw, 24px);
+        }
+
+        .status {
+            min-height: 28px;
+            margin-top: 12px;
+            font-size: 15px;
+            color: var(--muted);
+        }
+
+        .status.error {
+            color: var(--danger);
+        }
+
+        .keypad {
+            flex: 1 1 auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            min-height: 280px;
+        }
+
+        .keypad button, .action-btn, .payment-btn {
+            border: none;
+            border-radius: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        .keypad button {
+            min-height: 70px;
+            font-size: 24px;
+            color: var(--text);
+            background: linear-gradient(180deg, var(--panel-2), #0d1724);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+        }
+
+        .keypad button.primary {
+            background: linear-gradient(180deg, var(--accent), #00c78f);
+            color: #00140f;
+        }
+
+        .keypad button.secondary {
+            background: linear-gradient(180deg, #22384f, #1a2a3f);
+        }
+
+        .keypad button.danger {
+            background: linear-gradient(180deg, #ff7584, #ea4f62);
+            color: #fff;
+        }
+
+        .payment-panel {
+            border-radius: 24px;
+            padding: 18px;
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .payment-panel.visible {
+            display: flex;
+        }
+
+        .summary {
+            border-radius: 22px;
+            padding: 16px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .summary-box {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 18px;
+            padding: 14px;
+        }
+
+        .summary-label {
+            color: var(--muted);
+            font-size: 12px;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .summary-value {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .summary-value.money {
+            color: var(--accent);
+        }
+
+        .payment-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .payment-btn, .action-btn {
+            min-height: 72px;
+            font-size: 22px;
+            width: 100%;
+        }
+
+        .payment-btn {
+            background: linear-gradient(180deg, var(--accent), #00c78f);
+            color: #00140f;
+        }
+
+        .payment-btn.secondary {
+            background: linear-gradient(180deg, #22384f, #1b2940);
+            color: var(--text);
+        }
+
+        .sticky-action {
+            position: fixed;
+            left: 16px;
+            right: 16px;
+            bottom: 20px;
+            z-index: 10;
+        }
+
+        .action-btn {
+            background: linear-gradient(180deg, var(--accent-2), #4f84eb);
+            color: white;
+            box-shadow: 0 18px 30px rgba(67, 121, 224, 0.35);
+        }
+
+        .action-btn:disabled,
+        .payment-btn:disabled,
+        .keypad button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .hidden-input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+            width: 1px;
+            height: 1px;
+        }
+    </style>
+</head>
+<body>
+    <div class="mobile-shell">
+        <div class="header">
+            <div class="brand">LicensePortal</div>
+            <h1 class="title">Mobile Payment</h1>
+            <p class="subtitle">Enter a ticket, review the amount, then pay with a large touch-friendly flow.</p>
+        </div>
+
+        <div class="panel">
+            <div class="ticket-label">Ticket Code</div>
+            <input id="ticket-code" class="hidden-input" type="text" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false">
+            <div id="ticket-display" class="ticket-display placeholder">Tap keypad to enter ticket</div>
+            <div id="status" class="status">Supports scan-and-go links like /pay?ticket=A12345.</div>
+        </div>
+
+        <div id="entry-panel" class="panel" style="display:flex; flex-direction:column; gap:14px;">
+            <div class="keypad" aria-label="Ticket keypad">
+                <button type="button" onclick="appendTicket('1')">1</button>
+                <button type="button" onclick="appendTicket('2')">2</button>
+                <button type="button" onclick="appendTicket('3')">3</button>
+                <button type="button" onclick="appendTicket('4')">4</button>
+                <button type="button" onclick="appendTicket('5')">5</button>
+                <button type="button" onclick="appendTicket('6')">6</button>
+                <button type="button" onclick="appendTicket('7')">7</button>
+                <button type="button" onclick="appendTicket('8')">8</button>
+                <button type="button" onclick="appendTicket('9')">9</button>
+                <button type="button" class="danger" onclick="clearTicket()">C</button>
+                <button type="button" class="secondary" onclick="appendTicket('0')">0</button>
+                <button type="button" class="primary" onclick="appendTicket('A')">A</button>
+            </div>
+            <button id="continue-btn" class="action-btn" type="button" onclick="checkTicket()">Continue</button>
+        </div>
+
+        <div id="payment-panel" class="payment-panel">
+            <div class="summary">
+                <div class="summary-box">
+                    <div class="summary-label">Ticket</div>
+                    <div id="summary-ticket" class="summary-value">-</div>
+                </div>
+                <div class="summary-box">
+                    <div class="summary-label">Time</div>
+                    <div id="summary-time" class="summary-value">0 min</div>
+                </div>
+                <div class="summary-box" style="grid-column:1 / -1;">
+                    <div class="summary-label">Due</div>
+                    <div id="summary-amount" class="summary-value money">$0.00 AUD</div>
+                </div>
+            </div>
+
+            <div class="payment-options">
+                <button class="payment-btn secondary" type="button" onclick="demoPayment()">Demo Payment</button>
+                <button class="payment-btn" type="button" onclick="cardPayment()">Card Payment</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="sticky-action">
+        <button id="pay-now-btn" class="action-btn" type="button" onclick="cardPayment()" disabled>Pay Now</button>
+    </div>
+
+    <script>
+        let currentTicket = "";
+        let currentAmount = 0;
+
+        const ticketInput = document.getElementById("ticket-code");
+        const ticketDisplay = document.getElementById("ticket-display");
+        const statusEl = document.getElementById("status");
+        const paymentPanel = document.getElementById("payment-panel");
+        const entryPanel = document.getElementById("entry-panel");
+        const payNowBtn = document.getElementById("pay-now-btn");
+
+        function syncDisplay() {
+            const value = ticketInput.value.trim().toUpperCase();
+            ticketInput.value = value;
+            if (value) {
+                ticketDisplay.textContent = value;
+                ticketDisplay.classList.remove("placeholder");
+            } else {
+                ticketDisplay.textContent = "Tap keypad to enter ticket";
+                ticketDisplay.classList.add("placeholder");
+            }
+        }
+
+        function appendTicket(char) {
+            ticketInput.value = (ticketInput.value + char).toUpperCase();
+            syncDisplay();
+            statusEl.textContent = "";
+            statusEl.classList.remove("error");
+        }
+
+        function clearTicket() {
+            ticketInput.value = "";
+            syncDisplay();
+            statusEl.textContent = "Ticket cleared.";
+            statusEl.classList.remove("error");
+        }
+
+        async function checkTicket() {
+            const code = ticketInput.value.trim().toUpperCase();
+
+            if (!code) {
+                statusEl.textContent = "Enter a ticket code first.";
+                statusEl.classList.add("error");
+                return;
+            }
+
+            statusEl.classList.remove("error");
+            statusEl.textContent = "Checking ticket...";
+            payNowBtn.disabled = true;
+
+            try {
+                const response = await fetch("/check_ticket", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ code })
+                });
+
+                const data = await response.json();
+
+                if (!data.success) {
+                    statusEl.textContent = data.error || "Invalid ticket";
+                    statusEl.classList.add("error");
+                    return;
+                }
+
+                if (data.paid) {
+                    statusEl.textContent = "This ticket is already paid.";
+                    statusEl.classList.add("error");
+                    return;
+                }
+
+                const priceResponse = await fetch("/price", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ code })
+                });
+
+                const priceData = await priceResponse.json();
+
+                if (!priceData.success) {
+                    statusEl.textContent = priceData.error || "Failed to load price";
+                    statusEl.classList.add("error");
+                    return;
+                }
+
+                currentTicket = code;
+                currentAmount = priceData.amount;
+
+                document.getElementById("summary-ticket").textContent = code;
+                document.getElementById("summary-time").textContent = priceData.minutes + " min";
+                document.getElementById("summary-amount").textContent = "$" + priceData.amount.toFixed(2) + " AUD";
+
+                entryPanel.style.display = "none";
+                paymentPanel.classList.add("visible");
+                payNowBtn.disabled = false;
+                statusEl.textContent = "Ticket ready for payment.";
+            } catch (error) {
+                console.error(error);
+                statusEl.textContent = "Something went wrong.";
+                statusEl.classList.add("error");
+            }
+        }
+
+        function runEftpos(amount, callback) {
+            statusEl.classList.remove("error");
+            statusEl.textContent = "Processing payment for $" + amount.toFixed(2) + "...";
+            setTimeout(() => {
+                callback();
+            }, 1000);
+        }
+
+        async function cardPayment() {
+            if (!currentTicket) {
+                await checkTicket();
+                if (!currentTicket) {
+                    return;
+                }
+            }
+
+            payNowBtn.disabled = true;
+            runEftpos(currentAmount, async () => {
+                const response = await fetch("/mark_paid", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ code: currentTicket })
+                });
+
+                const data = await response.json();
+
+                if (!data.success) {
+                    statusEl.textContent = data.error || "Payment failed";
+                    statusEl.classList.add("error");
+                    payNowBtn.disabled = false;
+                    return;
+                }
+
+                statusEl.classList.remove("error");
+                statusEl.textContent = "Payment successful. Ticket marked as paid.";
+                payNowBtn.textContent = "Paid";
+            });
+        }
+
+        async function demoPayment() {
+            await cardPayment();
+        }
+
+        ticketInput.addEventListener("input", syncDisplay);
+        ticketInput.addEventListener("keydown", (event) => {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                checkTicket();
+            }
+        });
+
+        const queryTicket = new URLSearchParams(window.location.search).get("ticket");
+        const templateTicket = "{{ ticket | e }}";
+        const initialTicket = (queryTicket || templateTicket || "").trim();
+
+        if (initialTicket) {
+            ticketInput.value = initialTicket.toUpperCase();
+            syncDisplay();
+            setTimeout(() => {
+                checkTicket();
+            }, 150);
+        } else {
+            syncDisplay();
+        }
+    </script>
+</body>
+</html>

@@ -490,6 +490,23 @@ def pay():
     return render_template("pay.html")
 add_log("Accessed pay page")
 
+@app.route("/mobile/pay")
+def mobile_pay():
+    ticket = request.args.get("ticket", "").strip()
+    return render_template("mobile_pay.html", ticket=ticket)
+
+@app.route("/mobile/ticket")
+def mobile_ticket():
+    return redirect("/mobile/pay")
+
+@app.route("/mobile/receipt")
+def mobile_receipt():
+    return redirect("/mobile/pay")
+
+@app.route("/mobile/history")
+def mobile_history():
+    return redirect("/mobile/pay")
+
 @app.route("/check_ticket", methods=["POST"])
 def check_ticket():
     data = request.get_json(silent=True) or {}
