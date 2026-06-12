@@ -4,7 +4,7 @@ from flask import Flask, render_template, jsonify, request, redirect, session
 import sqlite3
 import time
 from datetime import datetime
-fron user_agents import parse
+from user_agents import parse
 import argparse
 
 LICENSE_NAME = "CHANGEME" ## Change this to your orgs name for licensing reasons.
