@@ -3,189 +3,178 @@
     <title>Pay for Parking</title>
 
     <style>
-        :root {
-    --bg: #081018;
-    --panel: #111c2a;
-    --panel2: #152538;
-    --text: #f4f8ff;
-    --muted: #9fb0c6;
-    --accent: #00e6a8;
-    --accent2: #67a8ff;
-}
+        body {
+            font-family: Arial;
+            background: #111;
+            color: white;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+        }
 
-body {
-    margin: 0;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background:
-        radial-gradient(circle at top,
-        rgba(103,168,255,.18),
-        transparent 35%),
-        radial-gradient(circle at bottom right,
-        rgba(0,230,168,.16),
-        transparent 30%),
-        linear-gradient(
-            180deg,
-            #071019 0%,
-            #0b1621 100%
-        );
+        .card {
+            background: #222;
+            padding: 40px;
+            border-radius: 20px;
+            width: 420px;
+            text-align: center;
+        }
 
-    font-family: Arial, sans-serif;
-    color: var(--text);
-    }
+        h1 {
+            margin-top: 0;
+        }
 
-    .shell {
-        width: 700px;
-    }
+        input {
+            width: 100%;
+            padding: 15px;
+            font-size: 22px;
+            border-radius: 10px;
+            border: none;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+        }
 
-    .header {
-        background: rgba(17,28,42,.92);
-        padding: 25px;
-        border-radius: 24px;
-        margin-bottom: 20px;
-    }
+        button {
+            width: 100%;
+            padding: 16px;
+            font-size: 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-bottom: 15px;
+        }
 
-    .card {
-        background: rgba(17,28,42,.92);
-        padding: 35px;
-        border-radius: 24px;
-    }
+        .status {
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
 
-    .brand {
-        color: var(--muted);
-        letter-spacing: .2em;
-        text-transform: uppercase;
-        font-size: 13px;
-    }
+        .unpaid {
+            color: #ffcc00;
+        }
 
-    input {
-        width: 100%;
-        padding: 16px;
-        font-size: 20px;
-        border: none;
-        border-radius: 16px;
-        background: var(--panel2);
-        color: white;
-        margin-bottom: 15px;
-    }
+        .paid {
+            color: #00ff99;
+        }
 
-    .primary-btn {
-        width: 100%;
-        padding: 16px;
-        border: none;
-        border-radius: 16px;
-        background: var(--accent);
-        color: #00140f;
-        font-size: 18px;
-        font-weight: bold;
-        cursor: pointer;
-    }
+        #demo-box {
+            margin-top: 20px;
+        }
 
-    .secondary-btn {
-        width: 100%;
-        padding: 16px;
-        border: none;
-        border-radius: 16px;
-        background: var(--panel2);
-        color: white;
-        font-size: 18px;
-        margin-bottom: 10px;
-        cursor: pointer;
-    }
+        .small-text {
+            font-size: 14px;
+            opacity: 0.7;
+            margin-top: 10px;
+        }
 
-    .summary {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 15px;
-        margin-bottom: 20px;
-    }
+        .eftpos-screen {
+            background: #111;
+            border: 3px solid #00ff99;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            width: 360px;
+        }
 
-    .summary-box {
-        background: rgba(255,255,255,.03);
-        border-radius: 18px;
-        padding: 15px;
-    }
+        .eftpos-screen div {
+            margin: 15px 0;
+        }
 
-    .summary-label {
-        color: var(--muted);
-        font-size: 12px;
-        text-transform: uppercase;
-    }
+        #eftpos-status {
+            font-size: 20px;
+        }
 
-    .summary-value {
-        font-size: 24px;
-        font-weight: bold;
-    }
+        #eftpos-amount {
+            font-size: 40px;
+            color: #00ff99;
+        }
 
-    .money {
-        color: var(--accent);
-    }
-
-    .hidden {
-        display: none;
-    }
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 
 <body>
 
 <div class="card">
+
     <div id="screen1">
+
+        <h1>Parking Payment</h1>
+
         <input
             type="text"
             id="ticket-code"
-            placeholder="Enter ticket code"
-        />
-        <button class="primary-btn" onclick="checkTicket()">Continue</button>
-        <div class="small-text">
-            Example: A1, A2 etc
-        </div>
-        <div class="small-text">
-            <a href="/mobile/pay">Mobile payment?</a>
-        </div>
-    </div>
-    <div id="screen2" class="hidden">
-        <h2>Ticket found!</h2>
-        <div class="summary">
-            <div class="summary-box">
-                <div class="summary-label">Time</div>
-                <div id="minutes" class="summary-value">
-                    0 minute(s)
-                </div>
-            </div>
-            <div class="summary-box">
-                <div class="summary-label">Amount Due</div>
-                <div id="amount-due" class="summary-value money">
-                    $0.00 AUD
-                </div>
-            </div>
-        </div>
-        <button class="secondary-btn" onclick="showDemoPayment()">
-            Demo payment
-        </button>
-        <button class="primary-btn" onclick="dummyCard()">
-            Credit / Debit Card
-        </button>
-        <div id="demo-box" class="hidden">
-            <input
-                    type="password"
-                    id="auth-code"
-                    placeholder="Enter Auth Code"
-                >
+            placeholder="Enter Ticket Code"
+        >
 
-                <button class="primary-btn" onclick="completeDemoPayment()">
-                    Confirm Payment
-                </button>
-            </div>
+        <button onclick="checkTicket()">
+            Continue
+        </button>
+
+        <div class="small-text">
+            Example codes: A41, A42...
         </div>
+
+        <div class="small-text">
+            <a href="/mobile/pay" style="color: #00ff99; text-decoration: none;">Open mobile payment</a>
+        </div>
+
     </div>
+
+    <div id="screen2" class="hidden">
+
+        <h1>Ticket Found</h1>
+
+        <div class="status unpaid">
+            Payment Required
+        </div>
+
+        <p>
+            Amount Due:
+            <b id ="amount-due">$0.00 AUD</b>
+        </p>
+        <p>
+            Parking Time:
+            <b id="minutes">0 minute(s)</b>
+        </p>
+
+        <div id="payment-options">
+
+            <button onclick="showDemoPayment()">
+                Demo Payment
+            </button>
+
+            <button onclick="dummyCard()">
+                Credit / Debit Card
+            </button>
+
+        </div>
+
+        <div id="demo-box" class="hidden">
+
+            <input
+                type="password"
+                id="auth-code"
+                placeholder="Enter Auth Code"
+            >
+
+            <button onclick="completeDemoPayment()">
+                Confirm Payment
+            </button>
+
+        </div>
+
+    </div>
+
 </div>
 <div id="eftpos-terminal" class="hidden">
     <div class="eftpos-screen">
         <div id="eftpos-status">TAP / INSERT CARD</div>
-        <div id="eftpos-amount">$0.00 AUD</div>
+        <div id="eftpos-amount">$0.00</div>
         <div id="eftpos-processing" class="hidden">PROCESSING...</div>
         <div id="eftpos-approved" class="hidden">APPROVED</div>
         <div id="eftpos-declined" class="hidden">DECLINED</div>
@@ -209,7 +198,7 @@ function runEftpos(amount, callback) {
     const processing = document.getElementById("eftpos-processing");
     const approved = document.getElementById("eftpos-approved");
     terminal.classList.remove("hidden");
-    document.getElementById("eftpos-amount").innerText = "$" + amount.toFixed(2) + " AUD";
+    document.getElementById("eftpos-amount").innerText = "$" + amount.toFixed(2);
     processing.classList.add("hidden");
     approved.classList.add("hidden");
     status.innerText = "TAP / INSERT CARD";
