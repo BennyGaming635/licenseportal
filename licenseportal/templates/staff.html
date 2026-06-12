@@ -75,6 +75,7 @@
             <tr>
                 <th>Ticket</th>
                 <th>Status</th>
+                <th>Portal</th>
                 <th>Amount Due</th>
                 <th>Actions</th>
             </tr>
@@ -90,6 +91,7 @@
                     <span class="unpaid">UNPAID</span>
                     {% endif %}
                 </td>
+                <td>{{ ticket.portal_id or 'N/A' }}</td>
                 <td>${{ "%.2f"|format(ticket.amount_due) }}</td>
                 <td>
                     {% if not ticket.paid %}
